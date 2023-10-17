@@ -1,4 +1,4 @@
-console.log("index.js");
+console.log("vslam backend, index.js");
 
 // Singleton of wasm ImagePreprocessor
 var preprocessor;
@@ -28,6 +28,16 @@ const outputImageContext = outputCanvas.getContext('2d', {desynchronized: true, 
 const duration = document.getElementById("preprocess-duration");
 const resolution = document.getElementById("resolution");
 
+// Open websocket connection
+const url = 'ws://' + location.hostname + ':8765';
+console.log('Ejecutando test para websockets', url);
+const webSocket = new WebSocket(url); // host includes port
+webSocket.onopen = (e)=>webSocket.send('Connection open!');
+
+console.log("index.js finished");
+
+/////////////////////////////////////////////////////////////////////////////////////
+
 // wasm ready, Module and preprocessor available
 async function setup(){
     console.log("setup...");
@@ -53,9 +63,11 @@ async function setup(){
     await video.play();
 
     // starts the annotation loop
-    setInterval(loop, 1000);
+    setInterval(loop, 200);
 }
 
+var features; // for debugging
+// Annotation loop
 function loop(){
     console.log("-------------------------------");
     // Capture image from video and put it in the heap, so wasm can grab it
@@ -70,13 +82,21 @@ function loop(){
     dataOnHeap.set(imgData.data);
 
     // Preprocess image on buffer
+    //var features;
     try{
         let startTime = performance.now();
-        const features = preprocessor.preprocess(dataOnHeap.byteOffset, width, height);
+        features = preprocessor.preprocess(dataOnHeap.byteOffset, width, height);
         let preprocessDuration = performance.now() - startTime;
+
         document.getElementById('preprocess-duration').innerText = Math.floor(preprocessDuration);
-        console.log("features", features);
+        //console.log("features", features);
         console.log("preprocess duration", preprocessDuration);
+
+        // Send features to server
+        if(features){
+            webSocket.send(features.array.slice()); // slice() copies the arrayBuffer, so it's not longer a SharedArrayBuffer, which can't be sent            
+        }
+
     } catch(err) {
         console.error("error", err);
     } finally {
@@ -90,5 +110,3 @@ function loop(){
         outputImageContext.putImageData(new ImageData(new Uint8ClampedArray(annotatedImage.array), annotatedImage.width, annotatedImage.height), 0, 0);
     }
 }
-
-console.log("index.js finished");

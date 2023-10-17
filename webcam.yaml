@@ -1,0 +1,23 @@
+Camera:
+  name: "Webcam Logitech C270"
+  setup: "monocular"
+  model: "perspective"
+
+  fx: 768.0
+  fy: 768.0
+  cx: 319.5
+  cy: 239.5
+
+  k1: 0.0
+  k2: 0.0  
+  p1: 0.0  
+  p2: 0.0
+  k3: 0.0
+
+  fps: 30.0
+  cols: 640
+  rows: 480
+
+  color_order: "BGR"
+
+# Parámetros calculados, no calibrados

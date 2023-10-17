@@ -1,52 +1,52 @@
-# Web preprocessor
+# VSLAM backend
 
-This repository holds a demo of the image preprocessor running on a web page.
-The web preprocessor page access the webcam and execute webassembly, so it won't run as files in your browser, you need a server.
-This repository has a very simple Python web server without security.  Usually it won't work because its lack of certificates.  To make the page work in chrome (PC or mobile), you need to add the server url to chrome://flags/#unsafely-treat-insecure-origin-as-secure only once, enable it and relaunch your browser
+This repository holds demos and tests of Python web server interacting with VSLAM.
 
-# Running the server
+Hols a copy of wasm files from wasm-preprocessor repository, and a modified copy of index.html and index.js from web-preprocessor repository to access the webcam and execute webassembly.
 
-Once you clone or downloaded this repository to a local folder, open a terminal in that folder and type
+Like web-preprocessor reposotory, this one has a very simple Python web server without security.  Usually it won't work because its lack of certificates.  To make the page work in chrome (PC or mobile), you need to add the server url to chrome://flags/#unsafely-treat-insecure-origin-as-secure only once, enable it and relaunch your browser
 
-    python3 server.py
 
-or
+# Web page file system
 
-    python server.py
+- index.html
+- index.css
+- index.js runs the page and invoke the preprocess method once a second
+- wasm folder has three files produced by emscripten, with the preprocessor itself
 
-As the server start it will show its own url.  You can simply navigate to it.
+Provided http servers can serve files from symbolic links.
 
-# Preprocessor web demo
+# Modular Python servers
 
-This is a TODO list as you navigate to it the first time:
+This repository has many Python files, some are programs, some are modules to be imported, and some are both: modules than can be run as programs.
 
-- as stated before, add the server url to chrome://flags/#unsafely-treat-insecure-origin-as-secure only once, enable it and relaunch your browser
-- chrome may ask permission to open de camera, allow it
+## httpServer.py
 
-Afer a few seconds, you will see two images and data:
+Starts a simple http server on given port (defaults to 8000) serving local files.  You can assign a port if starting it as a module, but it only works on port 8000 when run as a program.
 
-- the feed from the camera
-- a monochromatic version, captured once a second, with green circle annotations
-- preprocess time
-- video resolution
+It can be run asynchronously on a dedicated thread.
+It gets the local IP and prints its IP based index.html url, to facilitate a link.
+Not being a secure https server, it also gives directions to twitch chrome://flags for testing and developing.
 
-That's it, your preprocessor is working.
+## getMyIp.py
 
-# Why all this
+This module finds out the local machine's IP.
+It's useful to provide a link so other devices can open web pages from it.
 
-The web preprocessor is part of a bigger system.  It main role is to capture an image, preprocess it extracting features (keypoints and descriptors), and send it to a server with visual slam to further processing.
+## websocketServerExample.py
 
-This demo get those features but it do nothing with them.  You can see the keypoints annotations, as a visual confirmation that the preprocessing is actually doing what it is supposed to do.
+This module can run as a program.  It starts a websocket server on given port (defaults to 8765) with example code processing incoming websockets.
+Server can run ascynchronously to be launched on a dedicated thread.  Sample can be found in httpAndWebsocketsServerExample.py .
 
-If you edit the js files, remember to force refresh with shift+F5 in Chrome, so it discards old versions from cache.
+## httpAndWebsocketsServerExample.py
 
-# Project structure
+This sample runs in threads a web server and a websocket server.
 
-- server.py is the only file for the web server
-- web page
-    - index.html
-    - index.css
-    - index.js runs the page and invoke the preprocess method once a second
-    - wasm folder has three files produced by emscripten, with the preprocessor itself
 
-emscripten-bindings repository has all the files necessary to generate the wasm folder.  They are already here, but if you want to modify the preprocessor, you'll need to build it from scratch.
+## completeSystem.py
+
+This program brings all together running in threads a web server, both vslam viewers, and a websocket server bound to vslam.
+
+## camTest.py
+
+This test don't start any server, it runs vslam locally on a video feed por testing purpouses.
