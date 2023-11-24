@@ -2,7 +2,6 @@
 # run as main, or import and use runHttpServer(port)
 
 import http.server
-from getMyIP import get_my_ip_address
 
 httpPort = 8000
 
@@ -35,6 +34,7 @@ async def runAsyncHttpServer(serverOrPort=8000):
 
 # Launch server if main
 if __name__ == "__main__":
+    from getMyIP import get_my_ip_address
     print("Connect to this web server through:")
     print("http://", get_my_ip_address(), ":", httpPort, "/index.html", sep='')
     print("You should consider adding this url to chrome://flags/#unsafely-treat-insecure-origin-as-secure")

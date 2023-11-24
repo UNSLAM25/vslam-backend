@@ -4,35 +4,60 @@ Base code from httpAndWebsocketsServerExample.py
 and camTest.py
 '''
 
-import stellavslam
-#import cv2 as cv
+import lib.stellavslam as vslam
 import numpy as np
 import argparse
 from threading import Thread
-from websocketServerExample import runWebsocketServer
-from httpServer import runHttpServer
-from getMyIP import get_my_ip_address
+from lib.websocketServer import runWebsocketServer
+from lib.getMyIP import get_my_ip_address
+from lib.httpServer import runHttpServer
 import os
+
+countToPrint = 0
 
 # Callback executed when websocket server is started
 async def onWebsocket(websocketServer):
+    global countToPrint
     async for message in websocketServer:
         # Process income websocket message from web page
-        if(isinstance(message, (bytes, bytearray))):
+        if(isinstance(message, (bytes, bytearray))): #bytes)):#
             # binary data
 
             # 38 columns char array: 32 for descriptor, 6 for compressed keypoint.
             imageDescriptor = np.frombuffer(message, dtype=np.uint8).reshape(-1, 38)
             print("shape:", imageDescriptor.shape)#, len(imageDescriptor))
-            retVal, pose = SLAM.feed_monocular_frame(imageDescriptor, 0.0) # fake timestamp to keep it simple
-            if retVal:
-                print("Pose", pose)
-            else:
-                print("No pose")
+            print("1st row:", imageDescriptor[0])
+            print("last row:", imageDescriptor[-1])
+            print("last value:",imageDescriptor[-1, -1])
+            if imageDescriptor[-1, -1] == 255: # last row is debug row
+                # check descriptor integrity
+                debugSum = imageDescriptor[-1, :32].view(dtype=np.float32)[4]
+                descriptorSum = np.sum(imageDescriptor[0, :32])
+                if(debugSum != descriptorSum):
+                    print("Error: las sumas de descriptores difieren (descriptor y debug): ", descriptorSum, debugSum)
+                    print("message: tipo", type(message), "longitud", len(message))
+                    print("descriptor dañado:", imageDescriptor[0, :32])
+                else:
+                    # no error
+                    countToPrint = (countToPrint + 1) % 10
+                    if(countToPrint == 0):
+                        print("descriptor sano:", imageDescriptor[0, :32])
 
             # Print first keypoint
             myShortView = imageDescriptor.view(np.uint16)
             print("x,y,angle", myShortView[0,16], myShortView[0,17], 360.0 / 255.0 * imageDescriptor[0,36])
+
+            # Debug row
+            myFloatView = imageDescriptor[-1, 0:32].view(np.float32)
+            for i in range(5):
+                print(i, myFloatView[i])
+
+            # VSLAM
+            retVal, pose = SLAM.feed_monocular_frame(imageDescriptor, 0.0) # fake timestamp 0.0 to keep it simple
+            if retVal:
+                print("Pose", pose)
+            else:
+                print("No pose")
 
         else:
             # text data
@@ -44,17 +69,21 @@ async def onWebsocket(websocketServer):
 
 # Some arguments from run_video_slam.cc
 parser = argparse.ArgumentParser()
-parser.add_argument("-v", "--vocab", help="vocabulary file path", default="./orb_vocab.fbow")
+parser.add_argument("-v", "--vocab", help="vocabulary file path", default="./vslam/orb_vocab.fbow")
 #parser.add_argument("-m", "--video", help="video file path", default="0")
-parser.add_argument("-c", "--config", help="config file path", default="./config_Logitech_c270.yaml")
+parser.add_argument("-c", "--config", help="config file path", default="./vslam/config_Logitech_c270.yaml")
 parser.add_argument("-p", "--map_db", help="store a map database at this path after SLAM")
 parser.add_argument("-f", "--factor", help="scale factor to show video in window - doesn't affect stella_vslam", default=0.5, type=float)
 args = parser.parse_args()
 
 frameShowFactor = args.factor
-config = stellavslam.config(config_file_path=args.config)
-SLAM = stellavslam.system(cfg=config, vocab_file_path=args.vocab)
-VIEWER = stellavslam.viewer(config, SLAM)
+config = vslam.config(config_file_path=args.config)
+SLAM = vslam.system(cfg=config, vocab_file_path=args.vocab)
+VIEWER = vslam.viewer(config, SLAM)
+mapPath = args.map_db
+if mapPath:
+    SLAM.load_map_database(mapPath)
+
 SLAM.startup()
 print("stellavslam up and operational.")
 
@@ -63,7 +92,6 @@ wsPort = 8765
 
 print("Connect to this web server through:")
 print("http://", get_my_ip_address(), ":", httpPort, "/index.html", sep='')
-print("http://", get_my_ip_address(), ":", httpPort, "/test.html", sep='')
 print("You should consider adding this url to chrome://flags/#unsafely-treat-insecure-origin-as-secure")
 print("Ctrl+c to stop servers")
 

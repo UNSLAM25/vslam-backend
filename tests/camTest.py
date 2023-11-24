@@ -4,7 +4,7 @@ It only shows the pose matrix and the video feed.
 It doesn't show map nor features.
 
 Command line example:
-python3 test3.py -c ./aist_living_lab_1/config.yaml -m ./aist_living_lab_1/video.mp4
+python3 camTtest.py
 
 Valid pose only after initialization.
 You can check the pose is valid when last row is 0,0,0,1 .
@@ -14,8 +14,7 @@ It's not a bindings bug.  Try again - many times - until succeeding.
 
 Map save not tested.
 '''
-
-import stellavslam
+import stellavslam as vslam
 import cv2 as cv
 import sys
 import argparse
@@ -32,7 +31,7 @@ def run_slam():
     print("You should soon see the video in a window, and the 4x4 pose matrix on this terminal.")
     print("ESC to quit (focus on window: click on feeding frame window, then press ESC).")
     is_not_end = True   
-    
+
     while(is_not_end):
         is_not_end, frame = video.read()    
         if(frame.size):
@@ -47,23 +46,35 @@ def run_slam():
                 print()
         timestamp += 1
         key = cv.waitKey(1)  # Needed to refresh imshow window
-        if (key == 27):
+        if key == -1:
+            continue
+        elif key == 27:
             # ESC, finish
             break
+        key = chr(key).lower()
+        if key == 's':
+            # save map
+            SLAM.save_map_database(mapPath)
+            print("Map saved!", mapPath)
+            continue
 
 # Some arguments from run_video_slam.cc
 parser = argparse.ArgumentParser()
-parser.add_argument("-v", "--vocab", help="vocabulary file path", default="./orb_vocab.fbow")
+parser.add_argument("-v", "--vocab", help="vocabulary file path", default="./vslam/orb_vocab.fbow")
 parser.add_argument("-m", "--video", help="video file path", default="0")
-parser.add_argument("-c", "--config", help="config file path", default="./config_Logitech_c270.yaml")
-parser.add_argument("-p", "--map_db", help="store a map database at this path after SLAM")
+parser.add_argument("-c", "--config", help="config file path", default="./vslam/config_Logitech_c270.yaml")
+parser.add_argument("-p", "--map_db", help="open and store a map database at this path after SLAM")
 parser.add_argument("-f", "--factor", help="scale factor to show video in window - doesn't affect stella_vslam", default=0.5, type=float)
 args = parser.parse_args()
 
-config = stellavslam.config(config_file_path=args.config)
+config = vslam.config(config_file_path=args.config)
 
-SLAM = stellavslam.system(cfg=config, vocab_file_path=args.vocab)
-VIEWER = stellavslam.viewer(config, SLAM)
+SLAM = vslam.system(cfg=config, vocab_file_path=args.vocab)
+VIEWER = vslam.viewer(config, SLAM)
+
+mapPath = args.map_db
+if mapPath:
+    SLAM.load_map_database(mapPath)
 
 SLAM.startup()
 print("stellavslam up and operational.")

@@ -1,18 +1,6 @@
 '''
-This test runs stella_vslam on video.
-It only shows the pose matrix and the video feed.
-It doesn't show map nor features.
-
-Command line example:
-python3 test3.py -c ./aist_living_lab_1/config.yaml -m ./aist_living_lab_1/video.mp4
-
-Valid pose only after initialization.
-You can check the pose is valid when last row is 0,0,0,1 .
-
-stella_vslam is not bug free.  Sometimes it crashes (segmentation fault) right after map initialization.
-It's not a bindings bug.  Try again - many times - until succeeding.
-
-Map save not tested.
+...
+Fails os SLAM.viewer
 '''
 
 import stellavslam
@@ -54,9 +42,9 @@ def run_slam():
 
 # Some arguments from run_video_slam.cc
 parser = argparse.ArgumentParser()
-parser.add_argument("-v", "--vocab", help="vocabulary file path", default="./orb_vocab.fbow")
-parser.add_argument("-m", "--video", help="video file path", default="./video.mp4")
-parser.add_argument("-c", "--config", help="config file path", default="./equirectangular.yaml")
+parser.add_argument("-v", "--vocab", help="vocabulary file path", default="./vslam/orb_vocab.fbow")
+parser.add_argument("-m", "--video", help="video file path", default="./files/video.mp4")
+parser.add_argument("-c", "--config", help="config file path", default="./vslam/equirectangular.yaml")
 parser.add_argument("-p", "--map_db", help="store a map database at this path after SLAM")
 parser.add_argument("-f", "--factor", help="scale factor to show video in window - doesn't affect stella_vslam", default=0.5, type=float)
 args = parser.parse_args()

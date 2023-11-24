@@ -1,0 +1,1 @@
+/home/alejandro/Desarrollo/Visión artificial/stella_vslam 0.3.8/build/mapa.msg
