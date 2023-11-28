@@ -13,9 +13,18 @@ from lib.getMyIP import get_my_ip_address
 from lib.httpServer import runHttpServer
 import os
 
-countToPrint = 0
+# Some arguments from run_video_slam.cc
+parser = argparse.ArgumentParser()
+parser.add_argument("-v", "--vocab", help="vocabulary file path", default="./vslam/orb_vocab.fbow")
+parser.add_argument("-c", "--config", help="config file path", default="./vslam/config Logitech c270 640x480 calibrado.yaml")
+parser.add_argument("-p", "--map_db", help="store a map database at this path after SLAM")
+parser.add_argument("-f", "--factor", help="scale factor to show video in window - doesn't affect stella_vslam", default=0.5, type=float)
+args = parser.parse_args()
+
+
 
 # Callback executed when websocket server is started
+countToPrint = 0
 async def onWebsocket(websocketServer):
     global countToPrint
     async for message in websocketServer:
@@ -66,15 +75,6 @@ async def onWebsocket(websocketServer):
 
             # Are we expecting a JSON?
 
-
-# Some arguments from run_video_slam.cc
-parser = argparse.ArgumentParser()
-parser.add_argument("-v", "--vocab", help="vocabulary file path", default="./vslam/orb_vocab.fbow")
-#parser.add_argument("-m", "--video", help="video file path", default="0")
-parser.add_argument("-c", "--config", help="config file path", default="./vslam/config_Logitech_c270.yaml")
-parser.add_argument("-p", "--map_db", help="store a map database at this path after SLAM")
-parser.add_argument("-f", "--factor", help="scale factor to show video in window - doesn't affect stella_vslam", default=0.5, type=float)
-args = parser.parse_args()
 
 frameShowFactor = args.factor
 config = vslam.config(config_file_path=args.config)

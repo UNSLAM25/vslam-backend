@@ -79,7 +79,7 @@ async function setup(){
     await video.play();
 
     // starts the annotation loop
-    loopIntervalId = setInterval(loop, 1000);
+    loopIntervalId = setInterval(loop, 100);
 }
 
 var features; // for debugging

@@ -12,9 +12,9 @@ Camera:
   cols: 640
   rows: 480
 
-  fx: 451
-  fy: 451
-  cx: 320
+  fx: 710
+  fy: 710
+  cx: 314
   cy: 240
 
   k1: 0.0
