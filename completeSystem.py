@@ -21,8 +21,6 @@ parser.add_argument("-p", "--map_db", help="store a map database at this path af
 parser.add_argument("-f", "--factor", help="scale factor to show video in window - doesn't affect stella_vslam", default=0.5, type=float)
 args = parser.parse_args()
 
-
-
 # Callback executed when websocket server is started
 countToPrint = 0
 async def onWebsocket(websocketServer):
@@ -34,11 +32,11 @@ async def onWebsocket(websocketServer):
 
             # 38 columns char array: 32 for descriptor, 6 for compressed keypoint.
             imageDescriptor = np.frombuffer(message, dtype=np.uint8).reshape(-1, 38)
-            print("shape:", imageDescriptor.shape)#, len(imageDescriptor))
-            print("1st row:", imageDescriptor[0])
-            print("last row:", imageDescriptor[-1])
-            print("last value:",imageDescriptor[-1, -1])
             if imageDescriptor[-1, -1] == 255: # last row is debug row
+                print("shape:", imageDescriptor.shape)
+                print("1st row:", imageDescriptor[0])
+                print("last value:",imageDescriptor[-1, -1])
+
                 # check descriptor integrity
                 debugSum = imageDescriptor[-1, :32].view(dtype=np.float32)[4]
                 descriptorSum = np.sum(imageDescriptor[0, :32])

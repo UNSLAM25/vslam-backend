@@ -101,7 +101,7 @@ function loop(){
     //var features;
     try{
         let startTime = performance.now();
-        features = preprocessor.preprocess(dataOnHeap.byteOffset, width, height);
+        features = preprocessor.preprocess(dataOnHeap.byteOffset, width, height, 0);
         let preprocessDuration = performance.now() - startTime;
 
         duration.innerText = Math.floor(preprocessDuration);
