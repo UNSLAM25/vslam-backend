@@ -7,7 +7,7 @@ var preprocessor;
 var Module = {
     onRuntimeInitialized: async ()=>{
         console.log("WebAssembly Module loaded", Module, Module.Preprocessor);
-        preprocessor = new Module.Preprocessor(1500);
+        preprocessor = new Module.Preprocessor(800);
         console.log("preprocessor initialized");
         setTimeout(()=>{console.log("setup", window.setup);console.log(setup);setup();}, 1000); // setup is defined in index.js
     }
