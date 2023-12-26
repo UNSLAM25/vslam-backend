@@ -23,12 +23,12 @@ async def onWebsocketServerStartExample(websocketServer):
             # Are we expecting a JSON?
 
 # Run websocket server on given port
-def runWebsocketServer(onWebsocket=onWebsocketServerStartExample, port=8765):
-    asyncio.run(runAsyncWebsocketServer(onWebsocket, port))
+def runWebsocketServer(onWebsocket=onWebsocketServerStartExample, port=8765, **kwargServe):
+    asyncio.run(runAsyncWebsocketServer(onWebsocket, port, **kwargServe))
 
-async def runAsyncWebsocketServer(onWebsocket=onWebsocketServerStartExample, port=8765):
+async def runAsyncWebsocketServer(onWebsocket=onWebsocketServerStartExample, port=8765, **kwargServe):
     print("Websocket server running on port", port)
-    async with await serve(onWebsocket, "", port):
+    async with await serve(onWebsocket, "", port, **kwargServe):
         await asyncio.Future()  # run forever
 
 # Launch server if main

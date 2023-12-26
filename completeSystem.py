@@ -13,6 +13,8 @@ from lib.getMyIP import get_my_ip_address
 from lib.httpServer import runHttpServer
 import os
 
+print("Process id:", os.getpid())
+
 # Some arguments from run_video_slam.cc
 parser = argparse.ArgumentParser()
 parser.add_argument("-v", "--vocab", help="vocabulary file path", default="./vslam/orb_vocab.fbow")

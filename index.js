@@ -44,6 +44,8 @@ stepButton.addEventListener('click', e => {
     loop();
 });
 
+var myCheckbox = document.getElementById("myCheckbox");
+
 // Open websocket connection
 const url = 'ws://' + location.hostname + ':8765';
 console.log('Ejecutando test para websockets', url);
@@ -79,7 +81,7 @@ async function setup(){
     await video.play();
 
     // starts the annotation loop
-    loopIntervalId = setInterval(loop, 100);
+    loopIntervalId = setInterval(loop, 300);
 }
 
 var features; // for debugging
@@ -91,7 +93,15 @@ function loop(){
     const height = video.videoHeight;
     resolution.innerText = width + " x " + height;
     inputImageContext.drawImage(video, 0, 0, width, height);
-    const imgData = inputImageContext.getImageData(0, 0, width, height);    // uint8clampedarray, compatible with Uint8Array
+    imgData = inputImageContext.getImageData(0, 0, width, height);    // uint8clampedarray, compatible with Uint8Array
+
+    if(myCheckbox.checked){
+        // Send raw image
+        console.log("Image");
+        webSocket.send(imgData.data.slice());// RGBA
+        return;
+    }
+
     const numBytes = imgData.data.length * imgData.data.BYTES_PER_ELEMENT;
     const dataPtr = Module._malloc(numBytes);   // Allocate memory in the heap
     const dataOnHeap = new Uint8Array(Module.HEAPU8.buffer, dataPtr, numBytes);
