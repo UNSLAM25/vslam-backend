@@ -64,7 +64,8 @@ async function setup(){
         audio: false,
         video:{
             width: {ideal: 640},
-            height: {ideal: 480}
+            height: {ideal: 480},
+            facingMode: 'environment'   // rear camera
         }
     });
 

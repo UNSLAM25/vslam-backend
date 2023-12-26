@@ -4,7 +4,7 @@
 
 Camera:
 # Motorola One Fusion at 640p
-  name: "Celular"
+  name: "rear camera Moto One Fusion"
   setup: "monocular"
   model: "perspective"
 

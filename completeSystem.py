@@ -19,7 +19,8 @@ print("Process id:", os.getpid())
 parser = argparse.ArgumentParser()
 parser.add_argument("-v", "--vocab", help="vocabulary file path", default="./vslam/orb_vocab.fbow")
 parser.add_argument("-c", "--config", help="config file path", default="./vslam/config Logitech c270 640x480 calibrado.yaml")
-parser.add_argument("-p", "--map_db", help="store a map database at this path after SLAM")
+parser.add_argument("-l", "--map_load", help="load a map")
+parser.add_argument("-s", "--map_save", help="save a map after shutdown")
 parser.add_argument("-f", "--factor", help="scale factor to show video in window - doesn't affect stella_vslam", default=0.5, type=float)
 args = parser.parse_args()
 
@@ -80,7 +81,7 @@ frameShowFactor = args.factor
 config = vslam.config(config_file_path=args.config)
 SLAM = vslam.system(cfg=config, vocab_file_path=args.vocab)
 VIEWER = vslam.viewer(config, SLAM)
-mapPath = args.map_db
+mapPath = args.map_load
 if mapPath:
     SLAM.load_map_database(mapPath)
 
@@ -108,6 +109,10 @@ VIEWER.run()
 
 # The user pressed Terminate button
 SLAM.shutdown()
+mapSave = args.map_save
+if(mapSave):
+        SLAM.save_map_database(mapSave)
+        
 print("Finished")
 # It would be nice to kindly ask threads to join instead of abruptly closing them by exiting
 os._exit(0)
