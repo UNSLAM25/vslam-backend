@@ -63,7 +63,7 @@ async def onWebsocket(websocketServer):
                 print(i, myFloatView[i])
 
             # VSLAM
-            retVal, pose = SLAM.feed_monocular_frame(imageDescriptor, 0.0) # fake timestamp 0.0 to keep it simple
+            retVal, pose = vslamSystem.feed_monocular_frame(imageDescriptor, 0.0) # fake timestamp 0.0 to keep it simple
             if retVal:
                 print("Pose", pose)
             else:
@@ -79,13 +79,13 @@ async def onWebsocket(websocketServer):
 
 frameShowFactor = args.factor
 config = vslam.config(config_file_path=args.config)
-SLAM = vslam.system(cfg=config, vocab_file_path=args.vocab)
-VIEWER = vslam.viewer(config, SLAM)
+vslamSystem = vslam.system(cfg=config, vocab_file_path=args.vocab)
+vslamViewer = vslam.viewer(config, vslamSystem)
 mapPath = args.map_load
 if mapPath:
-    SLAM.load_map_database(mapPath)
+    vslamSystem.load_map_database(mapPath)
 
-SLAM.startup()
+vslamSystem.startup()
 print("stellavslam up and operational.")
 
 httpPort = 8000
@@ -105,13 +105,13 @@ ws_thread = Thread(target=runWebsocketServer, kwargs={'port':wsPort, 'onWebsocke
 ws_thread.start()
 
 # Blocking call
-VIEWER.run()
+vslamViewer.run()
 
 # The user pressed Terminate button
-SLAM.shutdown()
+vslamSystem.shutdown()
 mapSave = args.map_save
 if(mapSave):
-        SLAM.save_map_database(mapSave)
+    vslamSystem.save_map_database(mapSave)
         
 print("Finished")
 # It would be nice to kindly ask threads to join instead of abruptly closing them by exiting
