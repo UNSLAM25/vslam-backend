@@ -4,7 +4,7 @@ Base code from httpAndWebsocketsServerExample.py
 and camTest.py
 '''
 
-import lib.stellavslam as vslam
+from lib import stella_vslam as vslam
 import numpy as np
 import argparse
 from threading import Thread
@@ -12,6 +12,7 @@ from lib.websocketServer import runWebsocketServer
 from lib.getMyIP import get_my_ip_address
 from lib.httpServer import runHttpServer
 import os
+import time
 
 print("Process id:", os.getpid())
 
@@ -28,6 +29,7 @@ args = parser.parse_args()
 countToPrint = 0
 async def onWebsocket(websocketServer):
     global countToPrint
+    timestamp = time.time()
     async for message in websocketServer:
         # Process income websocket message from web page
         if(isinstance(message, (bytes, bytearray))): #bytes)):#
@@ -36,9 +38,9 @@ async def onWebsocket(websocketServer):
             # 38 columns char array: 32 for descriptor, 6 for compressed keypoint.
             imageDescriptor = np.frombuffer(message, dtype=np.uint8).reshape(-1, 38)
             if imageDescriptor[-1, -1] == 255: # last row is debug row
-                print("shape:", imageDescriptor.shape)
-                print("1st row:", imageDescriptor[0])
-                print("last value:",imageDescriptor[-1, -1])
+                # print("shape:", imageDescriptor.shape)
+                # print("1st row:", imageDescriptor[0])
+                # print("last value:",imageDescriptor[-1, -1])
 
                 # check descriptor integrity
                 debugSum = imageDescriptor[-1, :32].view(dtype=np.float32)[4]
@@ -47,28 +49,29 @@ async def onWebsocket(websocketServer):
                     print("Error: las sumas de descriptores difieren (descriptor y debug): ", descriptorSum, debugSum)
                     print("message: tipo", type(message), "longitud", len(message))
                     print("descriptor dañado:", imageDescriptor[0, :32])
-                else:
+                # else:
                     # no error
-                    countToPrint = (countToPrint + 1) % 10
-                    if(countToPrint == 0):
-                        print("descriptor sano:", imageDescriptor[0, :32])
+                    # countToPrint = (countToPrint + 1) % 10
+                    # if(countToPrint == 0):
+                    #     print("descriptor sano:", imageDescriptor[0, :32])
 
             # Print first keypoint
-            myShortView = imageDescriptor.view(np.uint16)
-            print("x,y,angle", myShortView[0,16], myShortView[0,17], 360.0 / 255.0 * imageDescriptor[0,36])
-
+            # myShortView = imageDescriptor.view(np.uint16)
+            # print("x,y,angle", myShortView[0,16], myShortView[0,17], 360.0 / 255.0 * imageDescriptor[0,36])
+            
             # Debug row
-            myFloatView = imageDescriptor[-1, 0:32].view(np.float32)
-            for i in range(5):
-                print(i, myFloatView[i])
+            # myFloatView = imageDescriptor[-1, :32].view(np.float32)
+            # for i in range(5):
+            #     print(i, myFloatView[i])
 
-            # VSLAM
-            retVal, pose = vslamSystem.feed_monocular_frame(imageDescriptor, 0.0) # fake timestamp 0.0 to keep it simple
+            # VSLAM           
+            retVal, pose = vslamSystem.feed_monocular_frame(imageDescriptor[:-1, :], timestamp) # fake timestamp 0.0 to keep it simple
+            timestamp += 1.0
+            print("Timestamp: ", timestamp)
             if retVal:
                 print("Pose", pose)
             else:
                 print("No pose")
-
         else:
             # text data
             print("Text:")
@@ -80,7 +83,7 @@ async def onWebsocket(websocketServer):
 frameShowFactor = args.factor
 config = vslam.config(config_file_path=args.config)
 vslamSystem = vslam.system(cfg=config, vocab_file_path=args.vocab)
-vslamViewer = vslam.viewer(config, vslamSystem)
+vslamViewer = vslam.viewer(config.yaml_node_['Viewer'], vslamSystem)
 mapPath = args.map_load
 if mapPath:
     vslamSystem.load_map_database(mapPath)

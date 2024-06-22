@@ -4,31 +4,74 @@
 
 Camera:
 # Logitech C270 at 640p
-  name: "Logitech C270"
+  name: "Logitech HD Webcam C270"
   setup: "monocular"
   model: "perspective"
 
-# Parámetros calculados, no calibrados:
+  fx: 832.44
+  fy: 832.44
+  cx: 319.5
+  cy: 239.5
+
+  k1: -0.01672
+  k2: 1.683981
+  p1: 0
+  p2: 0
+  k3: -7.24369
+
+  fps: 20.0
   cols: 640
   rows: 480
 
-  fx: 710
-  fy: 710
-  cx: 314
-  cy: 240
+  color_order: "Gray"
 
-  k1: 0.0
-  k2: 0.0  
-  p1: 0.0  
-  p2: 0.0
-  k3: 0.0
+#=====================#
+# Tracking Parameters #
+#=====================#
 
-  fps: 30.0
+Preprocessing:
+  min_size: 1500
 
-  color_order: "BGR"
+#================#
+# ORB Parameters #
+#================#
+
+Feature:
+  name: "default ORB feature extraction setting"
+  scale_factor: 1.2
+  num_levels: 8
+  ini_fast_threshold: 20
+  min_fast_threshold: 7
 
 #====================#
 # Mapping Parameters #
 #====================#
 
 Mapping:
+  backend: "g2o"
+  baseline_dist_thr_ratio: 0.02
+  redundant_obs_ratio_thr: 0.9
+  num_covisibilities_for_landmark_generation: 20
+  num_covisibilities_for_landmark_fusion: 20
+  erase_temporal_keyframes: false
+  num_temporal_keyframes: 15
+
+Tracking:
+  backend: "g2o"
+  enable_temporal_keyframe_only_tracking: false
+
+KeyframeInserter:
+  wait_for_local_bundle_adjustment: false
+
+Relocalizer:
+  search_neighbor: true
+
+LoopDetector:
+  backend: "g2o"
+
+System:
+  map_format: "msgpack"
+  num_grid_cols: 47
+  num_grid_rows: 30
+
+Viewer:

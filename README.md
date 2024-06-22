@@ -16,18 +16,20 @@ UNDER CONTRUCTION
 
 `stellavslam.cpython-310-x86_64-linux-gnu.so` file is provided for convenience and without guarantee, **you shouldn't even try to run a native file like this** if you don't really trust the author.  With this in mind, if you are a Linux user you probably already know this, and if you are a Windows user this file won't work for you (unless wsl, if you know what I mean).
 
-`stellavslam.cpython-310-x86_64-linux-gnu.so` is only a Python binder, you need `libstella_vslam.so` and `libpangolin_viewer.so` installed in your system: that's what building stella_vslam do.
+`stellavslam.cpython-310-x86_64-linux-gnu.so` is only a Python binder, you need `libstella_vslam.so` and `libpangolin_viewer.so` installed in your system: that's what building stella_vslam does.
 
 
 ## Python libraries
 Other than it, this repository is made of Python and web files, with at least one library needed:
 
  - Numpy
+ - Websockets
  - OpenCV, not needed in completeSystem.py, only used in camTest.py and pangolin-bindings-test.py
 
 Installation with pip (you can use other Python package manager like conda, whatever you choose you need to install it first)
 
     pip install numpy
+    pip install websockets
     pip install opencv-contrib-python
 
 You don't really need contrib in opencv, you can use other opencv packages instead.
