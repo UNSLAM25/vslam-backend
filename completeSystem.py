@@ -19,7 +19,7 @@ print("Process id:", os.getpid())
 # Some arguments from run_video_slam.cc
 parser = argparse.ArgumentParser()
 parser.add_argument("-v", "--vocab", help="vocabulary file path", default="./vslam/orb_vocab.fbow")
-parser.add_argument("-c", "--config", help="config file path", default="./vslam/config Logitech c270 640x480 calibrado.yaml")
+parser.add_argument("-c", "--config", help="config file path", default="./vslam/config.yaml")
 parser.add_argument("-l", "--map_load", help="load a map")
 parser.add_argument("-s", "--map_save", help="save a map after shutdown")
 parser.add_argument("-f", "--factor", help="scale factor to show video in window - doesn't affect stella_vslam", default=0.5, type=float)

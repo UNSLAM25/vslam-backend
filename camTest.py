@@ -24,7 +24,7 @@ from threading import Thread
 parser = argparse.ArgumentParser()
 parser.add_argument("-v", "--vocab", help="vocabulary file path", default="./vslam/orb_vocab.fbow")
 parser.add_argument("-m", "--video", help="video file path", default="0")
-parser.add_argument("-c", "--config", help="config file path", default="./vslam/config Logitech c270 640x480 calibrado.yaml")
+parser.add_argument("-c", "--config", help="config file path", default="./vslam/config.yaml")
 parser.add_argument("-p", "--map_db", help="open and store a map database at this path after SLAM")
 parser.add_argument("-f", "--factor", help="scale factor to show video in window - doesn't affect stella_vslam", default=0.5, type=float)
 args = parser.parse_args()
