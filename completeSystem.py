@@ -64,10 +64,12 @@ async def onWebsocket(websocketServer):
             # for i in range(5):
             #     print(i, myFloatView[i])
 
-            # VSLAM           
-            retVal, pose = vslamSystem.feed_monocular_frame(imageDescriptor[:-1, :], timestamp) # fake timestamp 0.0 to keep it simple
-            timestamp += 1.0
+            # VSLAM         
+            # Timestamp is important, see: https://github.com/stella-cv/stella_vslam_examples/blob/3606f68c9c3fb05a838e992230cb4a17106a7c41/src/run_camera_slam.cc#L174
+            timestamp = time.time()            
             print("Timestamp: ", timestamp)
+            retVal, pose = vslamSystem.feed_monocular_frame(imageDescriptor[:-1, :], timestamp)
+            
             if retVal:
                 print("Pose", pose)
             else:
