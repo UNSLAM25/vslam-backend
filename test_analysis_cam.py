@@ -1,23 +1,13 @@
 '''
-This test runs stella_vslam on video.
-It only shows the pose matrix and the video feed.
-It doesn't show map nor features.
-
-Command line example:
-python3 camTtest.py
-
-Valid pose only after initialization.
-You can check the pose is valid when last row is 0,0,0,1 .
-
-stella_vslam is not bug free.  Sometimes it crashes (segmentation fault) right after map initialization.
-It's not a bindings bug.  Try again - many times - until succeeding.
-
+Analysis binding check.
+Based on camTest.py .
 Map save not tested.
 '''
 import lib.stella_vslam as vslam
 import cv2 as cv
 import sys
 import argparse
+import os
 from threading import Thread
 
 # Some arguments from run_video_slam.cc
@@ -30,31 +20,46 @@ parser.add_argument("-f", "--factor", help="scale factor to show video in window
 args = parser.parse_args()
 config = vslam.config(config_file_path=args.config)
 
+def convert_to_cv2_keypoints(kps):
+    return [cv.KeyPoint(kp.x, kp.y, kp.size, kp.angle, kp.response, kp.octave, kp.class_id) for kp in kps]
+
 def run_slam():
     global frameShowFactor
     global video
-    global SLAM
+    global vslamSystem
 
     pose = []
     timestamp = 0.0
+    frame_observation = 0
+    skipPrintCount = 0
     print("Entering the video feed loop.")
     print("You should soon see the video in a window, and the 4x4 pose matrix on this terminal.")
     print("ESC to quit (focus on window: click on feeding frame window, then press ESC).")
-    is_not_end = True   
+    is_not_end = True
 
     while(is_not_end):
         is_not_end, frame = video.read()
         if(frame.size):
-            retVal, pose = SLAM.feed_monocular_frame(frame, timestamp) # fake timestamp to keep it simple
-        if((timestamp % 30) == 0):
-            print("Timestamp:", timestamp, "shape:", frame.shape, ", Pose:")
+            retVal, pose = vslamSystem.feed_monocular_frame(frame, timestamp) # fake timestamp to keep it simple
+            frame_observation = vslamSystem.get_frame_observation()
+        if(skipPrintCount >= 30):
+            skipPrintCount = 0
+            print(f"Timestamp: {timestamp}, shape: {frame.shape}, retVal: {retVal}")                
+            print(f"Descriptors: {frame_observation.descriptors.shape}")
+            kps = frame_observation.undist_keypts
+            print(f"Keypoints: {len(kps)}")
+            print(f"Status: {vslamSystem.get_state()}")
             
             # Format pose matrix with only a few decimals
-            for row in pose:
-                for data in row:
-                    sys.stdout.write('{:9.1f}'.format(data))
-                print()
-        timestamp += 1.0
+            if retVal:
+                for row in pose:
+                    for data in row:
+                        sys.stdout.write('{:9.1f}'.format(data))
+                    print()
+
+        timestamp += 0.033
+        skipPrintCount += 1
+
         key = cv.waitKey(1)  # Needed to refresh imshow window
         if key == -1:
             continue
@@ -64,19 +69,19 @@ def run_slam():
         key = chr(key).lower()
         if key == 's':
             # save map
-            SLAM.save_map_database(mapPath)
+            vslamSystem.save_map_database(mapPath)
             print("Map saved!", mapPath)
             continue
 
 
-SLAM = vslam.system(cfg=config, vocab_file_path=args.vocab)
-VIEWER = vslam.viewer(config, SLAM)
+vslamSystem = vslam.system(cfg=config, vocab_file_path=args.vocab)
+vslamViewer = vslam.viewer(config.yaml_node_['Viewer'], vslamSystem)
 
 mapPath = args.map_db
 if mapPath:
-    SLAM.load_map_database(mapPath)
+    vslamSystem.load_map_database(mapPath)
 
-SLAM.startup()
+vslamSystem.startup()
 print("stellavslam up and operational.")
 
 if(args.video.isdigit()):
@@ -93,8 +98,12 @@ video.set(cv.CAP_PROP_FRAME_HEIGHT, 480)
 
 frameShowFactor = args.factor
 
-slamThreadInstance = Thread(target=run_slam)
-slamThreadInstance.start()
-VIEWER.run()
-slamThreadInstance.join()
-SLAM.shutdown()
+vslamThreadInstance = Thread(target=run_slam)
+vslamThreadInstance.start()
+vslamViewer.run()
+
+vslamSystem.shutdown()
+print("Finished")
+# It should be nicer to kindly ask threads to join instead of abruptly closing them by exiting
+os._exit(0)
+vslamThreadInstance.join()

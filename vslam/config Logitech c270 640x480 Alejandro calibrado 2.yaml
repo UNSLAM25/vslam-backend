@@ -3,24 +3,24 @@
 #==============#
 
 Camera:
-# Logitech C270 at 640p
-  name: "Logitech C270"
+# Logitech C270 at 640p, 8/10/24
+  name: "Logitech C270 Alejandro"
   setup: "monocular"
   model: "perspective"
 
   cols: 640
   rows: 480
 
-  fx: 710
-  fy: 710
-  cx: 314
+  fx: 814
+  fy: 814
+  cx: 303
   cy: 240
 
-  k1: 0.0
-  k2: 0.0  
+  k1: -0.003
+  k2: 1.04
   p1: 0.0  
   p2: 0.0
-  k3: 0.0
+  k3: -3
 
   fps: 30.0
 
@@ -31,3 +31,6 @@ Camera:
 #====================#
 
 Mapping:
+
+Viewer:
+
