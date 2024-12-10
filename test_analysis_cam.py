@@ -55,7 +55,8 @@ def run_slam():
                 for row in pose:
                     for data in row:
                         sys.stdout.write('{:9.1f}'.format(data))
-                    print()
+                    sys.stdout.write('\n')
+                    #print()
 
         timestamp += 0.033
         skipPrintCount += 1

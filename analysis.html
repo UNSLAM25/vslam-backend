@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="/index.css">
+	<title>Preprocessor</title>
+</head>
+
+<body>
+	<h2>Input image</h2>
+	<img id="image" width="640" height="480" src="files/Teclado Logitech C720 640x480.jpeg"></img>
+	<canvas id="input" ></canvas>
+	<div>
+		<button id="send">Process</button>
+	</div>
+	<label for="myCheckbox">
+		<input type="checkbox" id="myCheckbox"> Send image instead of descriptor
+	</label>
+
+	<h2>Output</h2>
+	<canvas id="output" ></canvas>
+	<div>Preprocess duration: <span id="preprocess-duration"></span> ms</div>
+	<div>Input image resolution: <span id="resolution"></span> px</div>
+	
+	<script src="analysis.js" type="text/javascript"></script>
+	<script async src="wasm/preprocessor.js" type="text/javascript"></script><!-- WebASM Module import -->
+</body>
+</html>

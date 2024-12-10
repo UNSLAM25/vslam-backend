@@ -3,7 +3,7 @@
 #==============#
 
 Camera:
-# Logitech C270 at 640p
+# Logitech C270 at 640p: 640x480
   name: "Logitech HD Webcam C270 Alejandro"
   setup: "monocular"
   model: "perspective"

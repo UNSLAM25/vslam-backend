@@ -33,7 +33,7 @@ config = vslam.config(config_file_path=args.config)
 def run_slam():
     global frameShowFactor
     global video
-    global SLAM
+    global vslamSystem
 
     pose = []
     timestamp = 0.0
@@ -45,7 +45,7 @@ def run_slam():
     while(is_not_end):
         is_not_end, frame = video.read()
         if(frame.size):
-            retVal, pose = SLAM.feed_monocular_frame(frame, timestamp) # fake timestamp to keep it simple
+            retVal, pose = vslamSystem.feed_monocular_frame(frame, timestamp) # fake timestamp to keep it simple
         if((timestamp % 30) == 0):
             print("Timestamp:", timestamp, "shape:", frame.shape, ", Pose:")
             
@@ -64,19 +64,19 @@ def run_slam():
         key = chr(key).lower()
         if key == 's':
             # save map
-            SLAM.save_map_database(mapPath)
+            vslamSystem.save_map_database(mapPath)
             print("Map saved!", mapPath)
             continue
 
 
-SLAM = vslam.system(cfg=config, vocab_file_path=args.vocab)
-VIEWER = vslam.viewer(config, SLAM)
+vslamSystem = vslam.system(cfg=config, vocab_file_path=args.vocab)
+vslamViewer = vslam.viewer(config.yaml_node_['Viewer'], vslamSystem)
 
 mapPath = args.map_db
 if mapPath:
-    SLAM.load_map_database(mapPath)
+    vslamSystem.load_map_database(mapPath)
 
-SLAM.startup()
+vslamSystem.startup()
 print("stellavslam up and operational.")
 
 if(args.video.isdigit()):
@@ -95,6 +95,6 @@ frameShowFactor = args.factor
 
 slamThreadInstance = Thread(target=run_slam)
 slamThreadInstance.start()
-VIEWER.run()
+vslamViewer.run()
 slamThreadInstance.join()
-SLAM.shutdown()
+vslamSystem.shutdown()
