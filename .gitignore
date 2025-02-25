@@ -163,3 +163,5 @@ cython_debug/
 
 *.ini
 vslam/config.yaml
+files
+wasm/wasm 2025
