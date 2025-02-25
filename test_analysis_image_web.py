@@ -48,14 +48,22 @@ async def onWebsocket(websocketConnection):
             # Is it an image?
             # TODO
             if(len(message) > 500000):
-                # Image RGBA 640x480, the only supported format by now
-                messageType = 'image'
+                # Image RGBA 640x480
+                messageType = 'color image'
                 image = np.frombuffer(message, dtype=np.uint8).reshape(-1, 640, 4)
                 image = cv.cvtColor(image, cv.COLOR_RGBA2BGR)
                 print(f'Image shape {image.shape}')
                 mat = image
                 cv.imshow('Image', image)
 
+
+            elif(len(message) > 300000):
+                # Image 640x480
+                messageType = 'gray image'
+                image = np.frombuffer(message, dtype=np.uint8).reshape(-1, 640)
+                print(f'Image shape {image.shape}')
+                mat = image
+                cv.imshow('Image', image)
 
             else:        
                 # Descriptor, no image
@@ -101,12 +109,12 @@ async def onWebsocket(websocketConnection):
             #print(keypointsText)
 
             # Save file
-            with open(messageType + ' keypoints ' + str(timestamp) + '.csv', "w") as file:
+            with open('files/keypoints ' + messageType + str(timestamp) + '.csv', "w") as file:
                 file.write(keypointsPropsText)
                 file.write('\n')
                 file.write(keypointsText)
 
-            with open(messageType + ' descriptors ' + str(timestamp) + '.csv', "w") as file:
+            with open('files/descriptors ' + messageType + str(timestamp) + '.csv', "w") as file:
                 file.write('\n'.join(['; '.join([str(element) for element in descriptor]) for descriptor in descriptors]))
 
 

@@ -30,7 +30,7 @@ Camera:
 #=====================#
 
 Preprocessing:
-  min_size: 1500
+  min_size: 200
 
 #================#
 # ORB Parameters #
