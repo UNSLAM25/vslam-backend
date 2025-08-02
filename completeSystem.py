@@ -13,6 +13,7 @@ from lib.getMyIP import get_my_ip_address
 from lib.httpServer import runHttpServer
 import os
 import time
+import json
 
 print("Process id:", os.getpid())
 
@@ -29,10 +30,10 @@ args = parser.parse_args()
 countToPrint = 0
 async def onWebsocket(websocketServer):
     global countToPrint
-    timestamp = time.time()
+    descriptorTimestamp = 0
     async for message in websocketServer:
         # Process income websocket message from web page
-        if(isinstance(message, (bytes, bytearray))): #bytes)):#
+        if(isinstance(message, (bytes, bytearray))):
             # binary data
 
             # 38 columns char array: 32 for descriptor, 6 for compressed keypoint.
@@ -65,22 +66,42 @@ async def onWebsocket(websocketServer):
             #     print(i, myFloatView[i])
 
             # VSLAM         
-            # Timestamp is important, see: https://github.com/stella-cv/stella_vslam_examples/blob/3606f68c9c3fb05a838e992230cb4a17106a7c41/src/run_camera_slam.cc#L174
-            timestamp = time.time()            
-            print("Timestamp: ", timestamp)
+            # Timestamp is important, see: https://github.com/stella-cv/stella_vslam_examples/blob/3606f68c9c3fb05a838e992230cb4a17106a7c41/src/run_camera_slam.cc#L174    
+            timestamp = 0
+            if (descriptorTimestamp == 0):
+                print("Descriptor timestamp was not sent, defaulting to system time")
+                timestamp = time.time()
+            else: 
+                timestamp = descriptorTimestamp
+                descriptorTimestamp = 0
+ 
+            print("Timestamp: ", timestamp)            
             retVal, pose = vslamSystem.feed_monocular_frame(imageDescriptor[:-1, :], timestamp)
             
             if retVal:
                 print("Pose", pose)
+                poseMessage = {
+                    "type": "pose",
+                    "timestamp": time.time(),
+                    "status": "ok",
+                    "Twc": pose.tolist()
+                    # pose2D: [x, y, alpha]
+                }
+                await websocketServer.send(json.dumps(poseMessage))
             else:
                 print("No pose")
         else:
             # text data
-            print("Text:")
-            print(message)
-
-            # Are we expecting a JSON?
-
+            print("Received non-binary data, raw message:", message)            
+            try:
+                data = json.loads(message)                
+                if data['type'] == 'descriptor':
+                    descriptorTimestamp = data['timestamp']
+                
+            except Exception as e:
+                print(e)
+                print("Data could not be parsed as JSON")              
+            
 
 frameShowFactor = args.factor
 config = vslam.config(config_file_path=args.config)
@@ -97,7 +118,7 @@ httpPort = 8000
 wsPort = 8765
 
 print("Connect to this web server through:")
-print("http://", get_my_ip_address(), ":", httpPort, "/index.html", sep='')
+print("http://", get_my_ip_address(), ":", httpPort, "/web/index.html", sep='')
 print("You should consider adding this url to chrome://flags/#unsafely-treat-insecure-origin-as-secure")
 print("Ctrl+c to stop servers")
 
