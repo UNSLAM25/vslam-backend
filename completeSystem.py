@@ -39,10 +39,6 @@ async def onWebsocket(websocketServer):
             # 38 columns char array: 32 for descriptor, 6 for compressed keypoint.
             imageDescriptor = np.frombuffer(message, dtype=np.uint8).reshape(-1, 38)
             if imageDescriptor[-1, -1] == 255: # last row is debug row
-                # print("shape:", imageDescriptor.shape)
-                # print("1st row:", imageDescriptor[0])
-                # print("last value:",imageDescriptor[-1, -1])
-
                 # check descriptor integrity
                 debugSum = imageDescriptor[-1, :32].view(dtype=np.float32)[4]
                 descriptorSum = np.sum(imageDescriptor[0, :32])
@@ -50,15 +46,6 @@ async def onWebsocket(websocketServer):
                     print("Error: las sumas de descriptores difieren (descriptor y debug): ", descriptorSum, debugSum)
                     print("message: tipo", type(message), "longitud", len(message))
                     print("descriptor dañado:", imageDescriptor[0, :32])
-                # else:
-                    # no error
-                    # countToPrint = (countToPrint + 1) % 10
-                    # if(countToPrint == 0):
-                    #     print("descriptor sano:", imageDescriptor[0, :32])
-
-            # Print first keypoint
-            # myShortView = imageDescriptor.view(np.uint16)
-            # print("x,y,angle", myShortView[0,16], myShortView[0,17], 360.0 / 255.0 * imageDescriptor[0,36])
             
             # Debug row
             # myFloatView = imageDescriptor[-1, :32].view(np.float32)
@@ -85,7 +72,6 @@ async def onWebsocket(websocketServer):
                     "timestamp": time.time(),
                     "status": "ok",
                     "Twc": pose.tolist()
-                    # pose2D: [x, y, alpha]
                 }
                 await websocketServer.send(json.dumps(poseMessage))
             else:
@@ -100,8 +86,8 @@ async def onWebsocket(websocketServer):
                 
             except Exception as e:
                 print(e)
-                print("Data could not be parsed as JSON")              
-            
+                print("Data could not be parsed as JSON")
+                
 
 frameShowFactor = args.factor
 config = vslam.config(config_file_path=args.config)

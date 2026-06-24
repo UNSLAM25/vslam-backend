@@ -11,12 +11,39 @@ Like web-preprocessor reposotory, this one has a very simple Python web server w
 # Installation
 
 It is a long and painful journey.
-It involves building a modified stella_vslam project and making a Python module out of it, like `stellavslam.cpython-310-x86_64-linux-gnu.so`.
-UNDER CONTRUCTION
+It involves building a modified stella_vslam project and making a Python module out of it, like `stellavslam.cpython-310-x86_64-linux-gnu.so`.  Follow the instructions in these two repositories:
+
+- [UNSLAM/stella_vslam](https://github.com/UNSLAM25/stella_vslam)
+- [UNSLAM/StellaVSLAM-Python-bindings](https://github.com/UNSLAM25/StellaVSLAM-Python-bindings)
+
 
 `stellavslam.cpython-310-x86_64-linux-gnu.so` file is provided for convenience and without guarantee, **you shouldn't even try to run a native file like this** if you don't really trust the author.  With this in mind, if you are a Linux user you probably already know this, and if you are a Windows user this file won't work for you (unless wsl, if you know what I mean).
 
-`stellavslam.cpython-310-x86_64-linux-gnu.so` is only a Python binder, you need `libstella_vslam.so` and `libpangolin_viewer.so` installed in your system: that's what building stella_vslam does.
+`stellavslam.cpython-310-x86_64-linux-gnu.so` is only a Python binder, you need `libstella_vslam.so` and `libiridescence_viewer.so` installed in your system: that's what building stella_vslam does.
+
+## The Docker alternative
+[UNSLAM Docker image](https://drive.google.com/file/d/17kZMN87PW1gcBK1bDyl6A8Eg_-Q2IeLu/view?usp=drive_link) is provided without any warranty.  This image is an Ubuntu system with UNSLAM backend and UNSLAM stella_vslam version installed and ready to go.
+
+Run the image:
+
+```
+sudo docker run \
+--interactive --tty --rm --privileged \
+--publish 8000:8000 --publish 8765:8765 \
+--env DISPLAY=$DISPLAY \
+--volume /tmp/.X11-unix:/tmp/.X11-unix:ro \
+--volume $(pwd)/config.yaml:/stella_vslam/vslam-backend/vslam/config.yaml \
+unslam
+```
+
+You must provide your own config.yaml . Instead of rebuilding the image with that file in it, `--volume parameter` tells docker to get that particular file (`$(pwd)/config.yaml`) from your file system intead of its own file system.
+
+The same goes for changing code to any file.  You can be interested in experimenting with moditications to:
+
+- completeSystem.py
+- web/index.html
+- web/index.js
+- web/websocket.js
 
 
 ## Python libraries
